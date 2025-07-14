@@ -534,8 +534,45 @@
         </div>
     </main>
 
-    <footer>
-        <img src="LOGO.png" alt="Logo da Empresa Rodapé">
+   <footer>
+        <img src="LOGO.png" alt="Logo da Empresa Rodapé"> <br>
+        <style>
+            /* Estilo para o botão autossuficiente do rodapé */
+            .self-contained-button {
+                display: inline-block;
+                padding: 12px 24px;
+                font-family: 'Inter', sans-serif;
+                /* Use uma fonte padrão se 'Inter' não estiver carregada */
+                font-size: 1rem;
+                font-weight: 600;
+                color: #ffffff;
+                /* Cor do texto */
+                background: linear-gradient(90deg, #f96500 0%, #e65a00 100%);
+                /* Gradiente laranja */
+                border-radius: 8px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                text-decoration: none;
+                border: none;
+                box-shadow: 0 4px 15px rgba(249, 101, 0, 0.2);
+                cursor: pointer;
+                transition: all 0.3s ease;
+                /* Transição suave */
+            }
+
+            /* Efeito ao passar o mouse */
+            .self-contained-button:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 0 25px rgba(249, 101, 0, 0.4);
+                /* Efeito 'glow' */
+            }
+        </style>
+
+
+        <a href="https://script.google.com/macros/s/AKfycbysAxdwf0wLQe7rmkPbuOpmZhx6Q4ggJnpHBzT1PNhNCwbkN-H8hRDk4hOvlJqRXEVqrg/exec"
+            class="self-contained-button">
+            Retornar
+        </a>
     </footer>
 
     <div class="modal-overlay" id="natureza-modal-overlay">
