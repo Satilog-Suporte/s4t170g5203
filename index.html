@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Pagamentos</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /*
+     * ===================================================================
+     * ESTILOS CSS INTERNOS v31.0 - "Stable & Polished"
+     * ===================================================================
+     */
+        :root {
+            --cor-fundo-escuro: #1a1d24;
+            --cor-card-claro: #ffffff;
+            --cor-texto-escuro: #212529;
+            --cor-texto-secundario-escuro: #6c757d;
+            --cor-texto-claro: #f1f1f1;
+            --cor-borda-sutil: #ebebeb;
+            --cor-laranja-vibrante: #f96500;
+            --gradiente-laranja: linear-gradient(90deg, #f96500 0%, #e65a00 100%);
+            --sombra-laranja-glow: 0 0 25px rgba(249, 101, 0, 0.3);
+            --transition-suave: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--cor-fundo-escuro);
+            color: var(--cor-texto-claro);
+            margin: 0;
+            padding: 24px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        header {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 24px;
+        }
+
+        .header-side {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-side.right {
+            justify-content: flex-end;
+        }
+
+        header img {
+            height: 50px;
+        }
+
+        .header-title-container {
+            text-align: center;
+            grid-column: 2;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--cor-texto-claro);
+            margin: 0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        #subtitle-date {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--cor-texto-claro);
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        header .info-header {
+            text-align: right;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        #reset-view-button {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition-suave);
+            text-decoration: none;
+            color: var(--cor-card-claro);
+            background: var(--gradiente-laranja);
+            border: none;
+            box-shadow: 0 4px 15px rgba(249, 101, 0, 0.2);
+            text-transform: uppercase;
+        }
+
+        #reset-view-button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--sombra-laranja-glow);
+        }
+
+        #reset-view-button.hidden {
+            display: none;
+        }
+
+        #dashboard-container {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 24px;
+            align-items: stretch;
+            transition: grid-template-columns 0.5s ease;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .card {
+            background-color: var(--cor-card-claro);
+            color: var(--cor-texto-escuro);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--cor-borda-sutil);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--cor-texto-escuro);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card h3 i {
+            color: var(--cor-laranja-vibrante);
+        }
+
+        #departamentos-wrapper {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card-base {
+            text-align: center;
+            border-top: 5px solid var(--cor-laranja-vibrante);
+            cursor: pointer;
+            transition: var(--transition-suave);
+            padding: 16px;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .card-base:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1), var(--sombra-laranja-glow);
+        }
+
+        .card-base h3 {
+            font-size: 1.1rem;
+            color: var(--cor-texto-secundario-escuro);
+            margin-bottom: 8px;
+            height: auto;
+            justify-content: center;
+        }
+
+        .card-base p {
+            font-size: clamp(1.4rem, 2.5vw, 1.6rem);
+            font-weight: 600;
+            color: var(--cor-laranja-vibrante);
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .total-geral {
+            text-align: center;
+            border-top: 5px solid var(--cor-laranja-vibrante);
+            justify-content: flex-start;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .total-geral h3 {
+            font-size: 1.5rem;
+            justify-content: center;
+        }
+
+        .total-geral p {
+            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-weight: 600;
+            color: var(--cor-laranja-vibrante);
+            margin-top: 8px;
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+
+        .chart-container {
+            position: relative;
+            margin: 8px auto 0 auto;
+            width: 100%;
+            max-width: 300px;
+            height: 280px;
+        }
+
+        #custom-legend-container {
+            list-style: none;
+            padding: 0;
+            margin: 16px auto 0 auto;
+            text-align: left;
+            max-width: 300px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition-suave);
+        }
+
+        .legend-item:hover {
+            background-color: #f5f5f5;
+            transform: translateX(5px);
+        }
+
+        .legend-item.hidden {
+            opacity: 0.5;
+            background-color: #fafafa;
+            text-decoration: line-through;
+        }
+
+        .legend-color-box {
+            width: 12px;
+            height: 12px;
+            margin-right: 10px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .legend-text {
+            font-weight: 500;
+            color: var(--cor-texto-escuro);
+            flex-grow: 1;
+            margin-right: 16px;
+        }
+
+        .legend-percentage {
+            font-weight: 500;
+            color: var(--cor-texto-secundario-escuro);
+        }
+
+        .detalhe-natureza {
+            border-top: 5px solid var(--cor-texto-secundario-escuro);
+        }
+
+        #lista-natureza {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            list-style: none;
+            padding: 0;
+            margin: 16px 0 0 0;
+        }
+
+        .natureza-card {
+            background-color: #f8f9fa;
+            border: 1px solid var(--cor-borda-sutil);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: var(--transition-suave);
+        }
+
+        .natureza-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+        }
+
+        .natureza-card-nome {
+            font-weight: 600;
+            color: var(--cor-texto-escuro);
+            font-size: 0.95rem;
+            margin: 0 0 8px 0;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .natureza-card-valor {
+            font-weight: 600;
+            color: var(--cor-laranja-vibrante);
+            font-size: 1.25rem;
+            margin: 0 0 8px 0;
+        }
+
+        .progress-bar-container {
+            background-color: #e9ecef;
+            border-radius: 4px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: var(--gradiente-laranja);
+            height: 100%;
+            border-radius: 4px;
+            width: 0%;
+            transition: width 1s ease-out;
+        }
+
+        .avisos {
+            border-top: 5px solid var(--cor-laranja-vibrante);
+        }
+
+        #lista-sem-departamento {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        #lista-sem-departamento li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--cor-borda-sutil);
+        }
+
+        #lista-sem-departamento li:last-child {
+            border-bottom: none;
+        }
+
+        #lista-sem-departamento span {
+            font-weight: 500;
+            color: var(--cor-texto-secundario-escuro);
+        }
+
+        #lista-sem-departamento strong {
+            color: var(--cor-laranja-vibrante);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        #dashboard-container.filtered-view {
+            grid-template-columns: 0px 1fr;
+            gap: 0;
+        }
+
+        #dashboard-container.filtered-view .total-geral {
+            transform: scale(0.95);
+            opacity: 0;
+            padding: 0;
+            border: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            margin-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        footer img {
+            height: 60px;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        footer img:hover {
+            opacity: 1;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: white;
+            color: var(--cor-texto-escuro);
+            padding: 24px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--cor-borda-sutil);
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--cor-laranja-vibrante);
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--cor-texto-secundario-escuro);
+        }
+
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .modal-table th,
+        .modal-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--cor-borda-sutil);
+        }
+
+        .modal-table th {
+            font-weight: 600;
+        }
+
+        @media (max-width: 1200px) {
+
+            #dashboard-container,
+            #dashboard-container.filtered-view {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                grid-template-columns: auto 1fr auto;
+            }
+
+            header h1 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-side left">
+            <img src="LOGO.png" alt="Logo da Empresa">
+        </div>
+        <div class="header-title-container">
+            <h1 id="main-title">Contas pagas</h1>
+            <span id="subtitle-date">Junho / 2025</span>
+        </div>
+        <div class="header-side right">
+            <button id="reset-view-button" class="hidden">Visão Geral</button>
+        </div>
+    </header>
+
+    <main id="dashboard-container">
+        <div class="card total-geral" id="total-geral-card">
+            <h3><i class="fa-solid fa-money-bill-wave"></i>Total Pago no Mês</h3>
+            <p id="total-geral-valor">R$ 0,00</p>
+            <div class="chart-container"><canvas id="pizzaChart"></canvas></div>
+            <ul id="custom-legend-container"></ul>
+        </div>
+        <div class="main-content">
+            <section id="departamentos-wrapper"></section>
+            <section class="card detalhe-natureza" id="natureza-section">
+                <h3 id="natureza-title"><i class="fa-solid fa-list-ul"></i>PAGAMENTOS POR NATUREZA</h3>
+                <ul id="lista-natureza"></ul>
+            </section>
+            <section class="card avisos">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i>Lançamentos Sem Departamento</h3>
+                <ul id="lista-sem-departamento"></ul>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <img src="LOGO.png" alt="Logo da Empresa Rodapé">
+    </footer>
+
+    <div class="modal-overlay" id="natureza-modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Detalhes da Natureza</h2>
+                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="modal-table">
+                    <thead>
+                        <tr>
+                            <th>Empresa/Pessoa</th>
+                            <th>Departamento</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let fullDataset = [], pizzaChart = null, activeDepartmentFilter = null;
+        const COLS = { DEPARTAMENTO: 'DEPARTAMENTO', NATUREZA: 'NATUREZA', VALOR_DEPARTAMENTO: 'VALOR DEPARTAMENTO', VALOR_PAGO: 'VALOR PAGO', EMPRESA_PESSOA: 'EMPRESA/PESSOA' };
+        const CHART_COLORS = ['#939090', '#000000', '#f96500', '#545454', '#ffa033', '#b1b1b1', '#ffc485'];
+
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = formatCurrency(progress * (end - start) + start);
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function parseUniversalCurrency(value) {
+            if (typeof value === 'number') return value;
+            if (!value) return 0;
+            let s = String(value).trim();
+            if (s.includes('T') && s.includes('-') && s.includes(':')) { return 0; }
+            if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.');
+            else if (s.includes(',')) s = s.replace(',', '.');
+            const parsed = parseFloat(s);
+            return isNaN(parsed) ? 0 : parsed;
+        }
+
+        function formatCurrency(value) {
+            return (typeof value === 'number' ? value : 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function renderPizzaChart(departmentData, totalGeral) {
+            const ctx = document.getElementById('pizzaChart').getContext('2d');
+            if (pizzaChart) pizzaChart.destroy();
+            const sortedData = Object.entries(departmentData).sort(([a], [b]) => a.localeCompare(b));
+            pizzaChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: sortedData.map(([name]) => name),
+                    datasets: [{
+                        data: sortedData.map(([, total]) => total),
+                        backgroundColor: CHART_COLORS,
+                        borderColor: '#ffffff',
+                        borderWidth: 2,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.label || '';
+                                    const value = context.raw;
+                                    const percentage = totalGeral > 0 ? ((value / totalGeral) * 100).toFixed(2) : 0;
+                                    return ` ${label}: ${formatCurrency(value)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateCustomLegend(departmentData, totalGeral) {
+    const legendContainer = document.getElementById('custom-legend-container');
+    legendContainer.innerHTML = '';
+    const sortedData = Object.entries(departmentData).sort(([a], [b]) => a.localeCompare(b));
+    
+    // SUGESTÃO: Itera sobre os dados ordenados, mas pula a criação do item da legenda para "Não Alocado"
+    sortedData.forEach(([name, total], index) => {
+        if (name === 'Não Alocado') {
+            return; // Não mostra "Não Alocado" na legenda
+        }
+
+        const percentage = totalGeral > 0 ? ((total / totalGeral) * 100).toFixed(2) : 0;
+        const color = CHART_COLORS[index % CHART_COLORS.length];
+        const listItem = document.createElement('li');
+        listItem.className = 'legend-item';
+        listItem.innerHTML = `<div class="legend-color-box" style="background-color: ${color};"></div><span class="legend-text">${name}</span><span class="legend-percentage">${percentage}%</span>`;
+        
+        // A interatividade continua usando o 'index' original, que corresponde ao gráfico
+        listItem.onclick = () => {
+            const isHidden = !pizzaChart.getDataVisibility(index);
+            pizzaChart.toggleDataVisibility(index);
+            pizzaChart.update();
+            listItem.classList.toggle('hidden', isHidden);
+        };
+        listItem.onmouseover = () => pizzaChart.setActiveElements([{ datasetIndex: 0, index: index }]);
+        listItem.onmouseout = () => pizzaChart.setActiveElements([]);
+        legendContainer.appendChild(listItem);
+    });
+}
+        function renderNatureList(dataToDisplay) {
+            const totalsByNature = {};
+            dataToDisplay.forEach(row => {
+                const natureName = row[COLS.NATUREZA] || 'Não especificada';
+                const valueForNature = parseUniversalCurrency(row[COLS.VALOR_DEPARTAMENTO]);
+                totalsByNature[natureName] = (totalsByNature[natureName] || 0) + valueForNature;
+            });
+            const natureList = document.getElementById('lista-natureza');
+            const totalNaturezaVisivel = Object.values(totalsByNature).reduce((sum, val) => sum + val, 0);
+            natureList.innerHTML = '';
+            Object.entries(totalsByNature).sort(([, a], [, b]) => b - a).forEach(([name, total]) => {
+                const percentage = totalNaturezaVisivel > 0 ? (total / totalNaturezaVisivel) * 100 : 0;
+                natureList.innerHTML += `<li class="natureza-card" data-natureza="${name}"><div><h4 class="natureza-card-nome">${name}</h4><p class="natureza-card-valor">${formatCurrency(total)}</p></div><div class="progress-bar-container"><div class="progress-bar" style="width: ${percentage.toFixed(2)}%;"></div></div></li>`;
+            });
+        }
+
+        function showNatureDetailsModal(natureName) {
+            const modalOverlay = document.getElementById('natureza-modal-overlay');
+            const modalTitle = document.getElementById('modal-title');
+            const modalTableBody = document.getElementById('modal-table-body');
+            modalTitle.textContent = natureName;
+            modalTableBody.innerHTML = '';
+            let dataForModal = fullDataset.filter(row => (row[COLS.NATUREZA] || 'Não especificada') === natureName);
+            if (activeDepartmentFilter) {
+                dataForModal = dataForModal.filter(row => row[COLS.DEPARTAMENTO] === activeDepartmentFilter);
+            }
+            if (dataForModal.length > 0) {
+                dataForModal.sort((a, b) => parseUniversalCurrency(b[COLS.VALOR_DEPARTAMENTO]) - parseUniversalCurrency(a[COLS.VALOR_DEPARTAMENTO])).forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${row[COLS.EMPRESA_PESSOA] || '-'}</td><td>${row[COLS.DEPARTAMENTO] || 'N/A'}</td><td>${formatCurrency(parseUniversalCurrency(row[COLS.VALOR_DEPARTAMENTO]))}</td>`;
+                    modalTableBody.appendChild(tr);
+                });
+            } else {
+                modalTableBody.innerHTML = '<tr><td colspan="3">Nenhum lançamento encontrado.</td></tr>';
+            }
+            modalOverlay.classList.add('visible');
+        }
+
+    function initializeDashboard(data) {
+    fullDataset = data;
+
+    // A lógica de cálculo do Total Geral e do total "Não Alocado" permanece a mesma.
+    const groupedTransactions = {};
+    fullDataset.forEach(row => {
+        const valorPago = parseUniversalCurrency(row[COLS.VALOR_PAGO]);
+        const key = `${row[COLS.EMPRESA_PESSOA]}-${valorPago}-${row['DT. PAGO']}`;
+        if (!groupedTransactions[key]) {
+            groupedTransactions[key] = [];
+        }
+        groupedTransactions[key].push(row);
+    });
+
+    let finalTotal = 0;
+    for (const key in groupedTransactions) {
+        const rows = groupedTransactions[key];
+        const valorPagoTransacao = parseUniversalCurrency(rows[0][COLS.VALOR_PAGO]);
+        let somaValorDepartamento = 0;
+        rows.forEach(row => {
+            const valorDept = parseUniversalCurrency(row[COLS.VALOR_DEPARTAMENTO]);
+            if (valorDept > 0) {
+                somaValorDepartamento += valorDept;
+            }
+        });
+        if (somaValorDepartamento > 0) {
+            finalTotal += somaValorDepartamento;
+        } else {
+            finalTotal += valorPagoTransacao;
+        }
+    }
+
+    const totalValorElement = document.getElementById('total-geral-valor');
+    animateValue(totalValorElement, 0, finalTotal, 1500);
+
+    const totalsByDept = {};
+    const entriesWithoutDept = [];
+    const processedNoDeptPayments = new Set();
+    let totalNaoAlocado = 0;
+
+    fullDataset.forEach(row => {
+        const deptName = row[COLS.DEPARTAMENTO];
+        const deptoValue = parseUniversalCurrency(row[COLS.VALOR_DEPARTAMENTO]);
+
+        if (deptName && deptName.trim() !== '') {
+            totalsByDept[deptName] = (totalsByDept[deptName] || 0) + deptoValue;
+        } else {
+            const paymentKey = `${row[COLS.EMPRESA_PESSOA]}-${row[COLS.VALOR_PAGO]}-${row['DT. PAGO']}`;
+            if (!processedNoDeptPayments.has(paymentKey)) {
+                entriesWithoutDept.push(row);
+                processedNoDeptPayments.add(paymentKey);
+                if(deptoValue === 0) {
+                    totalNaoAlocado += parseUniversalCurrency(row[COLS.VALOR_PAGO]);
+                } else {
+                     totalNaoAlocado += deptoValue;
+                }
+            }
+        }
+    });
+    
+    if (totalNaoAlocado > 0) {
+        totalsByDept['Não Alocado'] = totalNaoAlocado;
+    }
+
+    const deptsContainer = document.getElementById('departamentos-wrapper');
+    deptsContainer.innerHTML = '';
+    
+    Object.entries(totalsByDept).sort(([a], [b]) => a.localeCompare(b)).forEach(([name, total]) => {
+        // SUGESTÃO: Adicionada esta condição para não criar o card "Não Alocado".
+        if (name === 'Não Alocado') {
+            return; // Pula a criação do card para esta categoria.
+        }
+        deptsContainer.innerHTML += `<div class="card card-base" data-departamento="${name}"><h3>${name}</h3><p>${formatCurrency(total)}</p></div>`;
+    });
+
+    const totalDepartamentos = Object.values(totalsByDept).reduce((sum, value) => sum + value, 0);
+    renderPizzaChart(totalsByDept, totalDepartamentos);
+    generateCustomLegend(totalsByDept, totalDepartamentos);
+
+    const noDeptList = document.getElementById('lista-sem-departamento');
+    if (entriesWithoutDept.length > 0) {
+        noDeptList.innerHTML = '';
+        entriesWithoutDept.sort((a, b) => parseUniversalCurrency(b[COLS.VALOR_PAGO]) - parseUniversalCurrency(a[COLS.VALOR_PAGO])).forEach(row => {
+            const paidValue = parseUniversalCurrency(row[COLS.VALOR_PAGO]);
+            noDeptList.innerHTML += `<li><span>${row[COLS.EMPRESA_PESSOA] || 'EMPRESA NÃO INFORMADA'}</span><strong>${formatCurrency(paidValue)}</strong></li>`;
+        });
+    } else {
+        noDeptList.innerHTML = '<li>Nenhum lançamento sem departamento encontrado.</li>';
+    }
+
+    renderNatureList(fullDataset);
+}
+
+        function setupEventListeners() {
+            const deptsContainer = document.getElementById('departamentos-wrapper');
+            const resetButton = document.getElementById('reset-view-button');
+            const dashboardContainer = document.getElementById('dashboard-container');
+            const natureTitle = document.getElementById('natureza-title');
+            const natureListContainer = document.getElementById('lista-natureza');
+            const modalOverlay = document.getElementById('natureza-modal-overlay');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            deptsContainer.addEventListener('click', e => {
+                const card = e.target.closest('.card-base');
+                if (!card) return;
+                const deptName = card.dataset.departamento;
+                activeDepartmentFilter = deptName;
+                const filteredData = fullDataset.filter(row => row[COLS.DEPARTAMENTO] === deptName);
+                dashboardContainer.classList.add('filtered-view');
+                resetButton.classList.remove('hidden');
+                natureTitle.innerHTML = `<i class="fa-solid fa-list-ul"></i>PAGAMENTOS POR NATUREZA (${deptName})`;
+                renderNatureList(filteredData);
+            });
+            resetButton.addEventListener('click', () => {
+                activeDepartmentFilter = null;
+                dashboardContainer.classList.remove('filtered-view');
+                resetButton.classList.add('hidden');
+                natureTitle.innerHTML = `<i class="fa-solid fa-list-ul"></i>PAGAMENTOS POR NATUREZA`;
+                renderNatureList(fullDataset);
+            });
+            natureListContainer.addEventListener('click', e => {
+                const card = e.target.closest('.natureza-card');
+                if (!card) return;
+                const natureName = card.dataset.natureza;
+                showNatureDetailsModal(natureName);
+            });
+            modalCloseBtn.addEventListener('click', () => modalOverlay.classList.remove('visible'));
+            modalOverlay.addEventListener('click', e => {
+                if (e.target === modalOverlay) modalOverlay.classList.remove('visible');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('BRUDAM_convertido.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erro na rede! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    initializeDashboard(data || []);
+                    setupEventListeners();
+                })
+                .catch(error => {
+                    alert("Erro ao carregar dados do arquivo JSON: " + error.message);
+                    console.error("Falha ao carregar o dashboard:", error);
+                });
+        });
+    </script>
+</body>
+
+</html>
